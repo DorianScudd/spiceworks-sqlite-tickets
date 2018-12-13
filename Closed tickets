@@ -1,0 +1,16 @@
+-- common table expression used to get summary view of closed tickets, to later be grouped by category and due date
+with ticketsummary	
+as	
+(	
+select t.summary, t.description, t.created_at, t.due_at, t.closed_at, t.category, t.id, u.last_name || ', ' || u.first_name as fname, t.assigned_to
+from tickets t	
+inner join users u	
+on t.created_by = u.id	
+where t.closed_at between datetime('now', '-8 months') AND datetime('now', 'localtime')
+)	
+	
+select ticketsummary.summary as Summary, ticketsummary.description as Description, ticketsummary.created_at,  ticketsummary.closed_at, ticketsummary.category as Category,  ticketsummary.id as "Ticket ID", ticketsummary.fname as 'Created By', u.last_name || ', ' || u.first_name as Technician, ticketsummary.due_at as Due
+from users u	
+inner join ticketsummary	
+on u.id = ticketsummary.assigned_to
+order by ticketsummary.closed_at
